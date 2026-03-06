@@ -185,6 +185,16 @@ Riley utilizes machine learning methods improving modulation of non-motor sympto
 M.S. Student in Biomedical Engineering, University of Florida.
 Gopal Viraj is a first‑year M.S. student in Biomedical Engineering at the University of Florida with a strong interest in biomaterials and regenerative medicine. He is open to pursuing both industry work and academic research in these areas in the future. His overall aim is to work in the healthcare industry to solve day‑to‑day diagnostic problems by applying the latest technologies in biomedical engineering.
 
+## Contact Us
+
+Joseph Luper Tsenum: josephtsenum@gatech.edu
+Riley Bendure: r.bendure@ufl.edu
+Gopal Viraj Koundinya V. Vutukuru: gv.vutukuru@ufl.edu
+
+Address: Malachowsky Hall
+1889 Museum Rd, Gainesville, FL 32611, United States
+
+
 ## Citation
 
 If you use this work, please cite:
