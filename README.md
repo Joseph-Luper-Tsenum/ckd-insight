@@ -181,7 +181,7 @@ to biomedical data analysis and drug discovery.
 M.S. Researcher in Biomedical Engineering (Brain Signal Processing), University of Florida.
 Riley utilizes machine learning methods improving modulation of non-motor symptoms in Parkinson's for adaptive deep brain stimulation with previous experience in Cochlear implant temporal signal processing. His aim is to bridge gaps between patient perception and effective neuromodulation in implantable neurostimulators.
 
-**Gopal Viraj Koundinya V. Vutukuru**:
+**Gopal Viraj Koundinya Vutukuru**:
 M.S. Student in Biomedical Engineering, University of Florida.
 Gopal Viraj is a first‑year M.S. student in Biomedical Engineering at the University of Florida with a strong interest in biomaterials and regenerative medicine. He is open to pursuing both industry work and academic research in these areas in the future. His overall aim is to work in the healthcare industry to solve day‑to‑day diagnostic problems by applying the latest technologies in biomedical engineering.
 
@@ -205,7 +205,7 @@ If you use this work, please cite:
 ```bibtex
 @misc{tsenum2025ckdinsight,
   title={CKD-Insight: Explainable Machine Learning for Chronic Kidney Disease Prediction},
-  author={Tsenum, Joseph Luper and Bendure, Riley and Vutukuru, Gopal Viraj Koundinya V.},
+  author={Tsenum, Joseph Luper and Bendure, Riley and Vutukuru, Gopal Viraj Koundinya},
   year={2026},
   institution={University of Florida},
   note={BME6938 Medical AI, Project 1}
