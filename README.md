@@ -200,9 +200,9 @@ If you use this work, please cite:
 ```
 ## Bibliography: 
 
-E. M. Chouit, M. Rachdi, M. Bellafkih, and B. Raouyane, “Interpretable machine learning for chronic kidney disease prediction: Insights from SHAP and LIME analyses,” PLoS One, vol. 21, no. 2, Art. no. e0343205, Feb. 2026.
+- ** E. M. Chouit, M. Rachdi, M. Bellafkih, and B. Raouyane, “Interpretable machine learning for chronic kidney disease prediction: Insights from SHAP and LIME analyses,” PLoS One, vol. 21, no. 2, Art. no. e0343205, Feb. 2026.
 
-I. Balikci Cicek and Z. Kucukakcali, “Explainable Artificial Intelligence Method SHAP’s Prediction of Risk Factors Associated with Chronic Kidney Disease Combined with Black Box Methods,” J. Comm. Med. and Pub. Health Rep., vol. 4, no. 10, Nov. 2023.
+- I. Balikci Cicek and Z. Kucukakcali, “Explainable Artificial Intelligence Method SHAP’s Prediction of Risk Factors Associated with Chronic Kidney Disease Combined with Black Box Methods,” J. Comm. Med. and Pub. Health Rep., vol. 4, no. 10, Nov. 2023.
 
 M. A. Islam, M. Z. H. Majumder, and M. A. Hussein, “Chronic kidney disease prediction based on machine learning algorithms,” J. Pathol. Inform., vol. 14, Art. no. 100189, Jan. 2023.
 
