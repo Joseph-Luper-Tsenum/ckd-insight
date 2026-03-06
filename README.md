@@ -58,7 +58,7 @@ project/
 ├── data/
 │   └── ckd_cleaned.csv                # Cleaned dataset (18 features, 400 patients)
 │
-├── figures/                           # All generated plots (SVG + PNG)
+├── figures/                           # All generated plots (SVG)
 │
 └── reports/
     ├── Project1_Group6_Report.pdf     # Final project report
