@@ -198,6 +198,43 @@ If you use this work, please cite:
   note={BME6938 Medical AI, Project 1}
 }
 ```
+## Bibliography: 
+
+E. M. Chouit, M. Rachdi, M. Bellafkih, and B. Raouyane, “Interpretable machine learning for chronic kidney disease prediction: Insights from SHAP and LIME analyses,” PLoS One, vol. 21, no. 2, Art. no. e0343205, Feb. 2026.
+
+I. Balikci Cicek and Z. Kucukakcali, “Explainable Artificial Intelligence Method SHAP’s Prediction of Risk Factors Associated with Chronic Kidney Disease Combined with Black Box Methods,” J. Comm. Med. and Pub. Health Rep., vol. 4, no. 10, Nov. 2023.
+
+M. A. Islam, M. Z. H. Majumder, and M. A. Hussein, “Chronic kidney disease prediction based on machine learning algorithms,” J. Pathol. Inform., vol. 14, Art. no. 100189, Jan. 2023.
+
+S. Sharma et al., “Machine Learning Algorithm for Detecting and Predicting Chronic Kidney Disease,” Biomed. & Pharmacol. J., vol. 18, no. 2, pp. 1230–1245, June 2025.
+
+E. M. Senan et al., “Diagnosis of Chronic Kidney Disease Using Effective Classification Algorithms and Recursive Feature Elimination Techniques,” J. Healthc. Eng., vol. 2021, Art. no. 1004767, June 2021.
+
+R. K. Halder et al., “ML-CKDP: Machine learning-based chronic kidney disease prediction with smart web application,” J. Pathol. Inform., vol. 15, Art. no. 100371, Feb. 2024.
+
+B. Metherall, A. K. Berryman, and G. S. Brennan, “Machine learning for classifying chronic kidney disease and predicting creatinine levels using at-home measurements,” Sci. Rep., vol. 15, Art. no. 4330, Feb. 2025.
+
+P. B. Mark et al., “Global, regional, and national burden of chronic kidney disease in adults, 1990–2023,” The Lancet, vol. 406, no. 10518, pp. 2461–2482, 2025.
+
+L. Rubini, P. Soundarapandian, and P. Eswaran, “Chronic Kidney Disease,” UCI Machine Learning Repository, 2015. https://doi.org/10.24432/C5G020
+
+S. M. Lundberg and S. I. Lee, “A Unified Approach to Interpreting Model Predictions,” in Proc. NeurIPS, 2017.
+
+S. M. Lundberg et al., “From local explanations to global understanding with explainable AI for trees,” Nature Machine Intelligence, vol. 2, pp. 56–67, 2020.
+
+F. Pedregosa et al., “Scikit-learn: Machine Learning in Python,” J. Machine Learning Res., vol. 12, pp. 2825–2830, 2011.
+
+T. Chen and C. Guestrin, “XGBoost: A Scalable Tree Boosting System,” in Proc. KDD, 2016.
+
+L. Breiman, “Random Forests,” Machine Learning, vol. 45, no. 1, pp. 5–32, 2001.
+
+A. S. Levey and J. Coresh, “Chronic kidney disease,” The Lancet, vol. 379, no. 9811, pp. 165–180, 2012.
+
+L. S. Shapley, “A value for n-person games,” Contributions to the Theory of Games, vol. 2, no. 28, pp. 307–317, 1953.
+
+O. Troyanskaya et al., “Missing value estimation methods for DNA microarrays,” Bioinformatics, vol. 17, no. 6, pp. 520–525, 2001.
+
+
 ## License
 
 This project is for educational purposes. The dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
