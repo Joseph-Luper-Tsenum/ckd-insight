@@ -187,7 +187,7 @@ Gopal Viraj is a first‑year M.S. student in Biomedical Engineering at the Univ
 
 ## Contact Us
 
-Joseph Luper Tsenum: josephtsenum@gatech.edu
+Joseph Luper Tsenum: josephtsenum@ufl.edu
 
 Riley Bendure: r.bendure@ufl.edu
 
