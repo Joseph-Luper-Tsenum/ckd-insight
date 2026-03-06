@@ -196,7 +196,7 @@ If you use this work, please cite:
   institution={University of Florida},
   note={BME6938 Medical AI, Project 1}
 }
-
+```
 ## License
 
 This project is for educational purposes. The dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
