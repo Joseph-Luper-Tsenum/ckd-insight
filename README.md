@@ -1,6 +1,6 @@
 # CKD-Insight: Explainable Machine Learning for Chronic Kidney Disease Prediction
 
-> An end-to-end ML pipeline for predicting Chronic Kidney Disease (CKD) with SHAP-based explainability, delivered through an interactive Streamlit web application.
+> An end-to-end machine learning pipeline for chronic kidney disease (CKD) risk prediction using classical ML models with SHAP-based explainability and an interactive dashboard for model exploration and patient-level interpretation.
 
 **BME6938: Medical AI · Project 1 · Group 6 · University of Florida · Spring 2026**
 
