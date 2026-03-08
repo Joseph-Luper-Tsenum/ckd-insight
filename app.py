@@ -56,7 +56,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🩺 CKD-Insight App: CKD Prediction & Explainability")
-st.caption("BME6938 Medical AI · Project 1 · Group 6 · Joseph Luper Tsenum, Riley Bendure, Gopal Viraj Koundinya Vutukuru")
+st.caption("BME6938 Medical AI · Project 1 · Group 6 · Joseph Luper Tsenum, Riley Bendure and Gopal Viraj Koundinya Vutukuru")
 
 tabs = st.tabs(["🔬 Patient Prediction", "📊 Model Performance",
                 "🌍 SHAP Global", "🔍 SHAP Local", "📈 SHAP Dependence",
