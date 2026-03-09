@@ -36,7 +36,7 @@ project/
 │   └── Phase3_CKD_SHAP.ipynb         # Phase III: SHAP Explainability
 │
 ├── app.py                             # Phase IV: Streamlit frontend (CKD-Insight App)
-├── backend.py                         # Phase IV: Flask backend (15 API endpoints)
+├── backend.py                         # Phase IV: Flask backend (15 API endpoints), however not utilized on Streamlit deployment due to lack of backend API
 │
 ├── models/                            # Trained models & preprocessor
 │   ├── ckd_random_forest_tuned.joblib
