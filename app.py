@@ -5,7 +5,7 @@
 # Author: Joseph Luper Tsenum, Riley Bendure and Gopal Viraj Koundinya Vutukuru 
 #
 # Usage:
-#   Terminal 1:  python backend.py
+#   Terminal 1:  python backend.py # now replaced with predict_patient()
 #   Terminal 2:  streamlit run app.py
 # ══════════════════════════════════════════════════════════════════════════════
 
