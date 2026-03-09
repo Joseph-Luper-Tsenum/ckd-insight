@@ -10,16 +10,25 @@
 # ══════════════════════════════════════════════════════════════════════════════
 
 import streamlit as st
-import requests
+import os
+import warnings
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import plotly.express as px
 import plotly.graph_objects as go
+import joblib
+from pathlib import Path
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    roc_auc_score, confusion_matrix, roc_curve
+)
+import shap
+
+warnings.filterwarnings("ignore")
 
 # ── Configuration ────────────────────────────────────────────────────────────
-BACKEND_URL = "http://127.0.0.1:5000"
 CKD_RED = "#C44E52"
 NOTCKD_BLUE = "#4C72B0"
 RF_GREEN = "#55A868"
@@ -27,17 +36,275 @@ XGB_RED = "#C44E52"
 MODEL_COLORS = {"Random Forest":"#55A868","XGBoost":"#C44E52",
                 "Logistic Regression":"#4C72B0","SVM":"#8172B2","Decision Tree":"#CCB974"}
 
-def call_backend(endpoint, body=None):
-    url = f"{BACKEND_URL}{endpoint}"
+# ── Load Models & Data ───────────────────────────────────────────────────────
+@st.cache_resource
+def load_models():
+    """Load all artifacts once at startup."""
+    PROJECT_ROOT = Path(".")
+    MODEL_DIR = PROJECT_ROOT / "models"
+    DATA_DIR  = PROJECT_ROOT / "data"
+    
+    models = {
+        "rf":  joblib.load(MODEL_DIR / "ckd_random_forest_tuned.joblib"),
+        "xgb": joblib.load(MODEL_DIR / "ckd_xgboost_tuned.joblib"),
+        "lr":  joblib.load(MODEL_DIR / "ckd_logistic_regression_tuned.joblib"),
+        "svm": joblib.load(MODEL_DIR / "ckd_svm_tuned.joblib"),
+        "dt":  joblib.load(MODEL_DIR / "ckd_decision_tree_tuned.joblib"),
+    }
+    
+    preprocessor = joblib.load(MODEL_DIR / "preprocessor.joblib")
+    X_train = np.load(MODEL_DIR / "X_train_processed.npy")
+    X_test  = np.load(MODEL_DIR / "X_test_processed.npy")
+    y_train = np.load(MODEL_DIR / "y_train.npy")
+    y_test  = np.load(MODEL_DIR / "y_test.npy")
+    feature_names = pd.read_csv(MODEL_DIR / "feature_names.csv")["feature"].tolist()
+    
+    # Precomputed SHAP values
+    shap_values = {}
+    for m in ["rf","xgb"]:
+        for split in ["test","train"]:
+            fpath = MODEL_DIR / f"{m}_shap_values_{split}.npy"
+            if fpath.exists():
+                sv = np.load(fpath)
+                if sv.ndim == 3: sv = sv[:,:,1]
+                shap_values[f"{m}_{split}"] = sv
+    
+    rf_explainer  = shap.TreeExplainer(models["rf"])
+    xgb_explainer = shap.TreeExplainer(models["xgb"])
+    explainers = {"rf": rf_explainer, "xgb": xgb_explainer}
+    
+    dataset_path = DATA_DIR / "ckd_cleaned.csv"
+    dataset_df = pd.read_csv(dataset_path) if dataset_path.exists() else pd.DataFrame()
+    
+    # Precompute predictions for local explanation tab
+    y_preds = {k: m.predict(X_test) for k,m in models.items()}
+    y_probas = {k: m.predict_proba(X_test)[:,1] for k,m in models.items()}
+    
+    return {
+        "models": models,
+        "preprocessor": preprocessor,
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_train": y_train,
+        "y_test": y_test,
+        "feature_names": feature_names,
+        "shap_values": shap_values,
+        "explainers": explainers,
+        "dataset_df": dataset_df,
+        "y_preds": y_preds,
+        "y_probas": y_probas,
+    }
+
+# Load all artifacts
+artifacts = load_models()
+models = artifacts["models"]
+preprocessor = artifacts["preprocessor"]
+X_train = artifacts["X_train"]
+X_test = artifacts["X_test"]
+y_train = artifacts["y_train"]
+y_test = artifacts["y_test"]
+feature_names = artifacts["feature_names"]
+shap_values = artifacts["shap_values"]
+explainers = artifacts["explainers"]
+dataset_df = artifacts["dataset_df"]
+y_preds = artifacts["y_preds"]
+y_probas = artifacts["y_probas"]
+
+model_names = {"rf":"Random Forest","xgb":"XGBoost","lr":"Logistic Regression",
+               "svm":"SVM","dt":"Decision Tree"}
+X_test_df  = pd.DataFrame(X_test, columns=feature_names)
+X_train_df = pd.DataFrame(X_train, columns=feature_names)
+
+# ── Helper Functions ─────────────────────────────────────────────────────────
+def safe_shap_row(sv, idx):
+    """Extract 1D SHAP row from potentially 3D array."""
+    row = sv[idx]
+    if row.ndim > 1: row = row[:,1]
+    return row.ravel()
+
+# ── Prediction Functions ─────────────────────────────────────────────────────
+def predict_patient(patient_data):
+    """Predict CKD for a patient."""
+    model_key = patient_data.pop("model", "rf")
+    numeric_cols = ["age","bp","sg","al","su","bgr","bu","sc","sod","pot","hemo","pcv","wc","rc"]
+    cat_cols = ["rbc","pc","pcc","ba"]
+    row = {c: float(patient_data.get(c,0)) for c in numeric_cols}
+    row.update({c: str(patient_data.get(c,"normal")) for c in cat_cols})
+    raw_df = pd.DataFrame([row])
     try:
-        if body is None:
-            r = requests.get(url, timeout=10)
-        else:
-            r = requests.post(url, json=body, timeout=10)
-        return r.json()
+        X_proc = preprocessor.transform(raw_df)
     except Exception as e:
-        st.error(f"⚠ Backend not reachable: {e}")
-        return None
+        return {"error": f"Preprocessing failed: {e}"}
+
+    model = models.get(model_key, models["rf"])
+    pred = int(model.predict(X_proc)[0])
+    prob = float(model.predict_proba(X_proc)[0][1])
+
+    explainer = explainers.get(model_key)
+    if explainer:
+        sv = explainer.shap_values(X_proc)
+        if isinstance(sv, list): sv = sv[1]
+        sv = np.array(sv)
+        if sv.ndim == 3: sv = sv[:,:,1]
+        shap_vals = sv[0].ravel().tolist()
+        bv = explainer.expected_value
+        if isinstance(bv, (list, np.ndarray)): bv = float(bv[1])
+        else: bv = float(bv)
+    else:
+        shap_vals = [0.0]*len(feature_names); bv = 0.5
+
+    return {"prediction":pred,"probability":prob,"model":model_key,
+            "shap_values":shap_vals,"base_value":bv,
+            "feature_names":feature_names,
+            "feature_values":X_proc[0].tolist()}
+
+def get_metrics():
+    """Get metrics for all models."""
+    results = []
+    for key, model in models.items():
+        yp = y_preds[key]; ypr = y_probas[key]
+        results.append({"Model":model_names[key],
+            "Accuracy":round(accuracy_score(y_test,yp),3),
+            "Precision":round(precision_score(y_test,yp),3),
+            "Recall":round(recall_score(y_test,yp),3),
+            "F1_Score":round(f1_score(y_test,yp),3),
+            "ROC_AUC":round(roc_auc_score(y_test,ypr),3)})
+    results.sort(key=lambda x: x["ROC_AUC"], reverse=True)
+    return {"metrics": results}
+
+def get_confusion_matrix(mk):
+    """Get confusion matrix for a model."""
+    cm = confusion_matrix(y_test, y_preds.get(mk, y_preds["rf"])).tolist()
+    return {"matrix":cm, "model_name":model_names.get(mk,mk)}
+
+def get_roc_data():
+    """Get ROC curve data for all models."""
+    curves = []
+    for key in models:
+        fpr,tpr,_ = roc_curve(y_test, y_probas[key])
+        auc = roc_auc_score(y_test, y_probas[key])
+        step = max(1, len(fpr)//100)
+        curves.append({"model":model_names[key],"fpr":fpr[::step].tolist(),
+                       "tpr":tpr[::step].tolist(),"auc":round(auc,3)})
+    return {"curves":curves}
+
+def get_feature_importance():
+    """Get feature importance for all 5 models."""
+    result = {}
+    for key, model in models.items():
+        if hasattr(model, "feature_importances_"):
+            imp = model.feature_importances_
+        elif hasattr(model, "coef_"):
+            imp = np.abs(model.coef_[0])
+        else:
+            # SVM with RBF — use permutation importance proxy via SHAP if available
+            if f"{key}_test" in shap_values:
+                imp = np.abs(shap_values[f"{key}_test"]).mean(axis=0).ravel()
+            else:
+                imp = np.zeros(len(feature_names))
+        imp = (imp / imp.sum()).tolist() if imp.sum() > 0 else imp.tolist()
+        result[key] = {"name": model_names[key], "importance": imp}
+    return {"features": feature_names, "models": result}
+
+def get_shap_global(mk):
+    """Get global SHAP importance for a model."""
+    key = f"{mk}_test"
+    if key not in shap_values:
+        return {"error":f"SHAP not found for {mk}"}
+    imp = np.abs(shap_values[key]).mean(axis=0).ravel().tolist()
+    return {"features":feature_names,"importance":imp,"model":mk}
+
+def get_shap_beeswarm(mk):
+    """Get SHAP beeswarm data."""
+    key = f"{mk}_test"
+    if key not in shap_values:
+        return {"error":"SHAP not found"}
+    sv = shap_values[key]
+    return {"features":feature_names,
+        "shap_matrix":[sv[:,i].tolist() for i in range(sv.shape[1])],
+        "feature_matrix":[X_test[:,i].tolist() for i in range(X_test.shape[1])]}
+
+def get_shap_dependence(mk, feat):
+    """Get SHAP dependence plot data."""
+    key = f"{mk}_train"
+    if key not in shap_values or feat not in feature_names:
+        return {"error":"Not found"}
+    idx = feature_names.index(feat)
+    return {"feature":feat,
+        "feature_values":X_train[:,idx].tolist(),
+        "shap_values":shap_values[key][:,idx].tolist()}
+
+def get_shap_local(mk, pidx):
+    """Get SHAP values for a specific test patient."""
+    key = f"{mk}_test"
+    if key not in shap_values or pidx >= len(y_test):
+        return {"error":"Invalid index or model"}
+
+    sv = shap_values[key]
+    row = sv[pidx].ravel().tolist()
+
+    bv = explainers[mk].expected_value if mk in explainers else 0.5
+    if isinstance(bv, (list,np.ndarray)): bv = float(bv[1])
+    else: bv = float(bv)
+
+    return {
+        "patient_idx": pidx,
+        "true_label": int(y_test[pidx]),
+        "pred_label": int(y_preds.get(mk, y_preds["rf"])[pidx]),
+        "probability": float(y_probas.get(mk, y_probas["rf"])[pidx]),
+        "shap_values": row,
+        "base_value": bv,
+        "feature_names": feature_names,
+        "feature_values": X_test[pidx].tolist()
+    }
+
+def get_shap_comparison():
+    """Get SHAP importance for RF and XGB side by side."""
+    result = {}
+    for mk in ["rf","xgb"]:
+        key = f"{mk}_test"
+        if key in shap_values:
+            result[mk] = np.abs(shap_values[key]).mean(axis=0).ravel().tolist()
+        else:
+            result[mk] = [0]*len(feature_names)
+    return {"features":feature_names, "rf":result["rf"], "xgb":result["xgb"]}
+
+def get_test_patients(mk):
+    """Get summary of test patients."""
+    preds = y_preds.get(mk, y_preds["rf"])
+    probs = y_probas.get(mk, y_probas["rf"])
+    patients = []
+    for i in range(len(y_test)):
+        true_l = int(y_test[i])
+        pred_l = int(preds[i])
+        correct = true_l == pred_l
+        patients.append({
+            "idx":i, "true":"CKD" if true_l==1 else "NotCKD",
+            "pred":"CKD" if pred_l==1 else "NotCKD",
+            "prob":round(float(probs[i]),3), "correct":correct,
+            "type": ("TP" if true_l==1 and pred_l==1 else
+                     "TN" if true_l==0 and pred_l==0 else
+                     "FN" if true_l==1 and pred_l==0 else "FP")
+        })
+    return {"patients":patients, "model":model_names.get(mk,mk)}
+
+def load_dataset():
+    """Load full dataset."""
+    if dataset_df.empty: return {"error":"Dataset not found"}
+    return {"data":dataset_df.head(400).to_dict(orient="list")}
+
+def get_feature_distribution(feat):
+    """Get feature distribution by class."""
+    if dataset_df.empty or feat not in dataset_df.columns:
+        return {"error":"Not available"}
+    df = dataset_df[[feat,"classification"]].dropna()
+    return {"values":df[feat].tolist(),"classes":df["classification"].tolist()}
+
+def get_missing_data():
+    """Get missing data summary."""
+    if dataset_df.empty: return {"error":"Not found"}
+    pct = (dataset_df.isna().mean()*100).round(1)
+    return {"features":pct.index.tolist(),"missing_pct":pct.values.tolist()}
 
 
 # ── Page setup ───────────────────────────────────────────────────────────────
@@ -123,7 +390,7 @@ with tabs[0]:
         patient = {"age":age,"bp":bp,"sg":sg,"al":al,"su":su,"bgr":bgr,"bu":bu,"sc":sc,
                    "sod":sod,"pot":pot,"hemo":hemo,"pcv":pcv,"wc":wc,"rc":rc,
                    "rbc":rbc,"pc":pc,"pcc":pcc,"ba":ba,"model":model_choice}
-        result = call_backend("/predict", patient)
+        result = predict_patient(patient)
         if result and "error" not in result:
             prob = result["probability"]
             pred = result["prediction"]
@@ -181,7 +448,7 @@ with tabs[1]:
     st.header("Model Performance")
 
     # Metrics
-    metrics = call_backend("/metrics")
+    metrics = get_metrics()
     if metrics:
         df_m = pd.DataFrame(metrics["metrics"])
 
@@ -213,7 +480,7 @@ with tabs[1]:
 
         with col_p2:
             st.subheader("ROC Curves")
-            roc = call_backend("/roc_data")
+            roc = get_roc_data()
             if roc:
                 fig = go.Figure()
                 for c in roc["curves"]:
@@ -232,7 +499,7 @@ with tabs[1]:
         for i, (mk, mname) in enumerate([("rf","Random Forest"),("xgb","XGBoost"),
                                           ("lr","Logistic Reg."),("svm","SVM"),("dt","Decision Tree")]):
             with cm_cols[i]:
-                cm_data = call_backend(f"/confusion_matrix?model={mk}")
+                cm_data = get_confusion_matrix(mk)
                 if cm_data:
                     cm = np.array(cm_data["matrix"])
                     fig, ax = plt.subplots(figsize=(3,3))
@@ -252,7 +519,7 @@ with tabs[1]:
 
         # Feature Importance — all 5 models
         st.subheader("Feature Importance — All 5 Models")
-        fi_data = call_backend("/feature_importance")
+        fi_data = get_feature_importance()
         if fi_data:
             fi_model = st.selectbox("Select model for feature importance:",
                                      list(fi_data["models"].keys()),
@@ -302,7 +569,7 @@ with tabs[2]:
     # Bar plot
     with col_g1:
         st.subheader("Mean |SHAP Value| — Feature Importance")
-        shap_data = call_backend(f"/shap_global?model={shap_model}")
+        shap_data = get_shap_global(shap_model)
         if shap_data:
             sdf = pd.DataFrame({"Feature":shap_data["features"],"Importance":shap_data["importance"]})
             sdf = sdf.sort_values("Importance", ascending=True).tail(15)
@@ -317,7 +584,7 @@ with tabs[2]:
     # Beeswarm
     with col_g2:
         st.subheader("SHAP Beeswarm — Feature Impact Distribution")
-        bee = call_backend(f"/shap_beeswarm?model={shap_model}")
+        bee = get_shap_beeswarm(shap_model)
         if bee:
             # Build DataFrame
             n_samples = len(bee["shap_matrix"][0])
@@ -345,7 +612,7 @@ with tabs[2]:
 
     # RF vs XGB comparison
     st.subheader("Random Forest vs. XGBoost — SHAP Comparison")
-    comp = call_backend("/shap_comparison")
+    comp = get_shap_comparison()
     if comp:
         cdf = pd.DataFrame({"Feature":comp["features"],
                              "Random Forest":comp["rf"], "XGBoost":comp["xgb"]})
@@ -374,7 +641,7 @@ with tabs[3]:
                                 key="local_model")
 
     # Load patient list
-    pts = call_backend(f"/test_patients?model={local_model}")
+    pts = get_test_patients(local_model)
     if pts:
         pt_list = pts["patients"]
 
@@ -403,7 +670,7 @@ with tabs[3]:
             pidx = pt_options[selected]
 
             # Fetch SHAP for this patient
-            local_data = call_backend(f"/shap_local?model={local_model}&patient_idx={pidx}")
+            local_data = get_shap_local(local_model, pidx)
             if local_data:
                 # Info cards
                 ic1, ic2, ic3, ic4 = st.columns(4)
@@ -474,7 +741,7 @@ with tabs[4]:
                                     key="dep_feature")
 
     with dep_col2:
-        dep = call_backend(f"/shap_dependence?model={dep_model}&feature={dep_feature}")
+        dep = get_shap_dependence(dep_model, dep_feature)
         if dep:
             fig, ax = plt.subplots(figsize=(9, 5))
             ax.scatter(dep["feature_values"], dep["shap_values"],
@@ -494,14 +761,14 @@ with tabs[4]:
 
     # Multi-feature dependence grid
     st.subheader("Top 6 Features — Dependence Grid")
-    shap_data = call_backend(f"/shap_global?model={dep_model}")
+    shap_data = get_shap_global(dep_model)
     if shap_data:
         imp_df = pd.DataFrame({"f":shap_data["features"],"i":shap_data["importance"]})
         top6 = imp_df.nlargest(6, "i")["f"].tolist()
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 9))
         for feat, ax in zip(top6, axes.flat):
-            dep_d = call_backend(f"/shap_dependence?model={dep_model}&feature={feat}")
+            dep_d = get_shap_dependence(dep_model, feat)
             if dep_d:
                 ax.scatter(dep_d["feature_values"], dep_d["shap_values"],
                            alpha=0.4, c=NOTCKD_BLUE, s=12, edgecolors="none")
@@ -521,7 +788,7 @@ with tabs[4]:
 with tabs[5]:
     st.header("Dataset Explorer")
 
-    data = call_backend("/dataset")
+    data = load_dataset()
     if data:
         df = pd.DataFrame(data["data"])
         st.dataframe(df, use_container_width=True, height=400)
@@ -532,7 +799,7 @@ with tabs[5]:
             dist_feat = st.selectbox("Feature:", ["hemo","sg","sc","al","bu","bgr",
                                                    "pcv","rc","age","bp","sod","pot"],
                                       key="dist_feat")
-            dist = call_backend(f"/feature_distribution?feature={dist_feat}")
+            dist = get_feature_distribution(dist_feat)
             if dist:
                 ddf = pd.DataFrame({"value":dist["values"],"class":dist["classes"]})
                 fig = px.histogram(ddf, x="value", color="class", barmode="overlay",
@@ -542,7 +809,7 @@ with tabs[5]:
 
         with col_d2:
             st.subheader("Missing Data Summary")
-            miss = call_backend("/missing_data")
+            miss = get_missing_data()
             if miss:
                 mdf = pd.DataFrame({"Feature":miss["features"],"Pct":miss["missing_pct"]})
                 mdf = mdf[mdf["Pct"]>0].sort_values("Pct")
