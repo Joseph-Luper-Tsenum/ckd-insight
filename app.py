@@ -244,7 +244,7 @@ def get_shap_local(mk, pidx):
     row = sv[pidx].ravel().tolist()
 
     bv = explainers[mk].expected_value if mk in explainers else 0.5
-    if isinstance(bv, (list,np.ndarray)): bv = float(bv[1])
+    if isinstance(bv, (list,np.ndarray)): bv = float(bv[-1]) if len(bv) > 0 else 0.5
     else: bv = float(bv)
 
     return {
