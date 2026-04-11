@@ -2,8 +2,6 @@
 
 > An end-to-end machine learning pipeline for chronic kidney disease (CKD) risk prediction using classical ML models with SHAP-based explainability and an interactive dashboard for model exploration and patient-level interpretation.
 
-**BME6938: Medical AI · Project 1 · Group 6 · University of Florida · Spring 2026**
-
 ---
 
 ## Clinical Context
@@ -61,8 +59,8 @@ project/
 ├── figures/                           # All generated plots (SVG)
 │
 └── reports/
-    ├── Project1_Group6_Report.pdf     # Final project report
-    ├── Project1_Group6_Report.docx    # Final project report
+    ├── Project_Report.pdf     # Final project report
+    ├── Project1_Report.docx    # Final project report
     ├── CDK_EDA_Report.docx            # Phase I report
     ├── CKD_Modeling_Report.docx       # Phase II report
     ├── CKD_SHAP_Report.docx           # Phase III report
@@ -180,27 +178,27 @@ Ph.D. Researcher in Biomedical Engineering (Modeling & Biomedical Data Science S
 Joseph develops Generative AI platforms for designing novel oligonucleotides and applies machine learning methods
 to biomedical data analysis and drug discovery.
 
-**Riley Bendure**:
-M.S. Researcher in Biomedical Engineering (Brain Signal Processing), University of Florida.
-Riley utilizes machine learning methods improving modulation of non-motor symptoms in Parkinson's for adaptive deep brain stimulation with previous experience in Cochlear implant temporal signal processing. His aim is to bridge gaps between patient perception and effective neuromodulation in implantable neurostimulators.
-
 **Gopal Viraj Koundinya Vutukuru**:
 M.S. Student in Biomedical Engineering, University of Florida.
 Gopal Viraj is a first‑year M.S. student in Biomedical Engineering at the University of Florida with a strong interest in biomaterials and regenerative medicine. He is open to pursuing both industry work and academic research in these areas in the future. His overall aim is to work in the healthcare industry to solve day‑to‑day diagnostic problems by applying the latest technologies in biomedical engineering.
+
+**Riley Bendure**:
+M.S. Researcher in Biomedical Engineering (Brain Signal Processing), University of Florida.
+Riley utilizes machine learning methods improving modulation of non-motor symptoms in Parkinson's for adaptive deep brain stimulation with previous experience in Cochlear implant temporal signal processing. His aim is to bridge gaps between patient perception and effective neuromodulation in implantable neurostimulators.
 
 ## Individual Contributions 
 
 Each team member contributed to the preparation of the written report and the development of the project deliverables. 
 
-1. **Joseph Luper Tsenum** – Responsible for writing the Abstract and coordinating the project, ensuring that the different components of the analysis were well integrated and consistent across all four phases of the work. 
+1. **Joseph Luper Tsenum** – Responsible for writing the Abstract and coordinating the project, ensuring that the different components of the analysis were well integrated and consistent across all four phases of the work.
 
-2. **Riley Bendure** – Responsible for writing the Introduction, providing background on chronic kidney disease (CKD) and motivating the importance of applying machine learning methods for early risk prediction. 
+2. **Gopal Viraj Koundinya Vutukuru** – Responsible for writing the Literature Review, summarizing existing research on machine learning approaches for CKD prediction and identifying the motivation for explainable machine learning models.
 
-3. **Gopal Viraj Koundinya Vutukuru** – Responsible for writing the Literature Review, summarizing existing research on machine learning approaches for CKD prediction and identifying the motivation for explainable machine learning models. 
+3. **Riley Bendure** – Responsible for writing the Introduction, providing background on chronic kidney disease (CKD) and motivating the importance of applying machine learning methods for early risk prediction. 
 
 ## Collaboration 
 
-Throughout the four phases of the project, the team maintained a highly collaborative workflow, meeting regularly to discuss progress, make decisions, and coordinate tasks. As a group, we collectively selected the UCI Chronic Kidney Disease (CKD) dataset and worked together across all stages of the project, including exploratory data analysis (EDA), model development, evaluation, report preparation, and application development. 
+Throughout the four phases of the project, the team maintained a highly collaborative workflow, meeting regularly to discuss progress, make decisions, and coordinate tasks. As a group, we collectively selected the UCI Chronic Kidney Disease (CKD) dataset and worked together across all stages of the project, including exploratory data analysis (EDA), model development, evaluation, report and abstract preparation, and application development. 
 
 Most of the work was conducted during in-person meetings, where team members jointly reviewed analyses, implemented modeling approaches, and refined the outputs for each phase. The final notebooks and project artifacts were compiled collaboratively to ensure consistency and reproducibility across the entire pipeline. 
 
@@ -210,11 +208,7 @@ This project reflects the type of collaborative environment commonly encountered
 
 ## Contact Us
 
-Joseph Luper Tsenum: josephtsenum@ufl.edu
-
-Riley Bendure: r.bendure@ufl.edu
-
-Gopal Viraj Koundinya V. Vutukuru: gv.vutukuru@ufl.edu
+Joseph Luper Tsenum: tsenumjosephluper@gmail.com
 
 Address: Malachowsky Hall
 
@@ -225,15 +219,6 @@ Address: Malachowsky Hall
 
 If you use this work, please cite:
 
-```bibtex
-@misc{tsenum2025ckdinsight,
-  title={CKD-Insight: Explainable Machine Learning for Chronic Kidney Disease Prediction},
-  author={Tsenum, Joseph Luper and Bendure, Riley and Vutukuru, Gopal Viraj Koundinya},
-  year={2026},
-  institution={University of Florida},
-  note={BME6938 Medical AI, Project 1}
-}
-```
 ## Declaration of AI Use 
 
 We acknowledge the use of Claude Opus 4.6 AI and ChatGPT 5.2 tools to support our understanding and assist with coding, particularly in implementing the project in Python.
